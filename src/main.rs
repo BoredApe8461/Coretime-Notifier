@@ -1,4 +1,4 @@
-/// ## RegionX Coretime Notifications
+/// ## Coretime Notifier
 
 fn main() {
     println!("Hello")
