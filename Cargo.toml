@@ -4,3 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+tokio = { version = "1", features = ["full"] }
+
+api = { path = "./services/api", package = "api-service" }
+storage = { path = "./services/storage", package = "storage-service" }
+tracker = { path = "./services/tracker", package = "tracker-service" }

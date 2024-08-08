@@ -1,5 +1,6 @@
 /// ## Coretime Notifier
 
-fn main() {
-    println!("Hello")
+#[tokio::main]
+async fn main() {
+    tracker::track().await.unwrap();
 }
