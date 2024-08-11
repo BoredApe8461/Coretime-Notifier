@@ -31,7 +31,8 @@ pub async fn track() -> Result<(), Box<dyn std::error::Error>> {
 		.await?
 		.ok_or("Failed to query sale info")?;
     
-    println!("{:?}", sale_info);
+    // Based on the sale start we will derive other time related data.
+    
 
     Ok(())
 }
