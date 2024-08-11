@@ -12,9 +12,9 @@ extern crate rocket;
 
 #[launch]
 fn rocket() -> _ {
-    rocket::build()
-        .attach(CorsOptions::default().to_cors().unwrap())
-        .mount("/", routes![])
+	rocket::build()
+		.attach(CorsOptions::default().to_cors().unwrap())
+		.mount("/", routes![])
 }
 
 // There should be three paths: one POST path to set the notification configuration,
