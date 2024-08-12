@@ -6,3 +6,6 @@ edition = "2021"
 [dependencies]
 rocket = { version = "0.5.0", features=["json"] }
 rocket_cors = "0.6.0"
+serde = "1.0.193"
+
+types = { path = "../../types" }
