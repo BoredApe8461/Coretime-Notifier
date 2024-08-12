@@ -38,6 +38,8 @@ pub enum TimeOptions {
 }
 
 /// The available methods to receive a notification.
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Hash)]
+#[serde(crate = "rocket::serde")]
 pub enum Notifier {
 	Email,
 	Telegram,

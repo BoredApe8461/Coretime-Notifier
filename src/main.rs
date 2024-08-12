@@ -2,6 +2,6 @@
 
 #[tokio::main]
 async fn main() {
-	tracker::track().await.unwrap();
 	storage::initialize_db().unwrap();
+	tracker::track().await.unwrap();
 }

@@ -1,6 +1,6 @@
 use rocket::{post, serde::json::Json};
 use serde::{Deserialize, Serialize};
-use types::Notifications;
+use types::{Notifications, Notifier};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
