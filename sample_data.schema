@@ -1,0 +1,14 @@
+CREATE TABLE users {
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    -- address VARCHAR NOT NULL,
+    tg_handle VARCHAR DEFAULT NULL,
+    email VARCHAR DEFAULT NULL,
+    notifier ENUM('email', 'telegram'),
+    -- verified boolean
+}
+
+CREATE TABLE notifications {
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    notification_type VARCHAR NOT NULL,
+    created_when TIMESTAMP,
+}
