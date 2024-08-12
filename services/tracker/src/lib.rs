@@ -50,8 +50,6 @@ pub async fn track() -> Result<(), Box<dyn std::error::Error>> {
 		println!("{}", block.header().number);
 
 		// Track everything we want to track:
-		//
-		// NOTE: lets not await each of at once. Instead call all of them and then wait.
 		track_coretime_sales(&client, &block).await;
 		track_interlude_phase(&block, interlude_start);
 		track_leadin_phase(&block, leadin_start);
