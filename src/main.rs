@@ -1,5 +1,7 @@
-/// ## RegionX Coretime Notifications
+/// ## Coretime Notifier
 
-fn main() {
-    println!("Hello")
+#[tokio::main]
+async fn main() {
+	storage::initialize_db().unwrap();
+	tracker::track().await.unwrap();
 }
