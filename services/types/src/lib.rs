@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use serde::{Deserialize, Serialize};
 
 /// Different events to which a user can subscribe to.
@@ -43,4 +45,5 @@ pub enum TimeOptions {
 pub enum Notifier {
 	Email,
 	Telegram,
+	Null,
 }

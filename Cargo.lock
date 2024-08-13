@@ -97,6 +97,8 @@ dependencies = [
  "rocket",
  "rocket_cors",
  "serde",
+ "serde_json",
+ "storage-service",
  "types",
 ]
 
@@ -3193,6 +3195,7 @@ name = "storage-service"
 version = "0.1.0"
 dependencies = [
  "rusqlite",
+ "types",
 ]
 
 [[package]]

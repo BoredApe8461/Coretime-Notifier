@@ -1,20 +1,23 @@
-use rusqlite::{Connection, Result};
+use rusqlite::{params, Connection, Result};
+use types::Notifier;
 
 #[derive(Debug)]
 pub struct User {
 	pub id: u32,
-	pub address: String,
-	pub username: String,
+	pub email: String,
+	pub tg_handle: String,
+    pub notifier: Notifier,
 }
 
 impl User {
-    fn query_all(conn: &Connection) -> Result<Vec<User>> {
+    pub fn query_all(conn: &Connection) -> Result<Vec<User>> {
         let mut smth = conn.prepare("SELECT * FROM users WHERE id=?1")?;
         let users_iter = smth.query_map((), |row| {
             Ok(User {
                 id: row.get(0)?,
-                username: row.get(1)?,
-                address: row.get(2)?,
+                email: row.get(1)?,
+                tg_handle: row.get(2)?,
+                notifier: Notifier::Null,
             })
         })?;
         
@@ -26,17 +29,72 @@ impl User {
         Ok(users)
     }
 
-    fn query_by_id(conn: &Connection, id: u32) -> Result<User> {
+    pub fn query_by_id(conn: &Connection, id: u32) -> Result<User> {
         let mut smth = conn.prepare("SELECT * FROM users WHERE id=?1")?;
         let mut users_iter = smth.query_map(&[&id], |row| {
             Ok(User {
                 id: row.get(0)?,
-                username: row.get(1)?,
-                address: row.get(2)?,
+                email: row.get(1)?,
+                tg_handle: row.get(2)?,
+                notifier: Notifier::Null,
             })
         })?;
 
         let user = users_iter.next().unwrap().unwrap();
         Ok(user)
+    }
+
+    pub fn create_user(conn: &Connection, user: &User) -> Result<()> {
+        let User {
+            email, 
+            tg_handle,
+            ..
+        } = user;
+        let notifier = match user.notifier {
+            Notifier::Email => "email",
+            Notifier::Telegram => "telegram",
+            _  => ""
+        };
+
+        if notifier.len() > 0 {
+            conn.execute(
+                "INSERT INTO users
+                    (email, tg_handle, notifier)
+                    VALUES (?1, ?2, ?3)
+                ",
+                params![email, tg_handle, notifier]
+            )?;
+        } else {
+            conn.execute(
+            "INSERT INTO users
+                    (email, tg_handle)
+                    VALUES (?1, ?2)
+                ",
+                params![email, tg_handle]
+            )?;
+        }
+        Ok(())
+    }
+
+    pub fn get_connection() -> Result<Connection> {
+        let db_path = "db/users.db";
+       
+       // Verify the db exists
+       // Create the `users.db` if it does not exist.
+       let conn = Connection::open(db_path)?;
+       conn.execute(
+            "CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                tg_handle TEXT,
+                email TEXT,
+                notifier TEXT CHECK (
+                    notifier IN ('email', 'telegram') 
+                    OR notifier IS NULL
+                )
+            )",
+            (),
+        )?;
+
+        Ok(conn)
     }
 }
