@@ -5,16 +5,18 @@
 //! Users will configure coretime notifications through a frontend interface. The frontend will then
 //! send these configurations to the web server exposed by this service for processing and storage.
 
+use rocket::{Build, Rocket};
 use rocket_cors::CorsOptions;
+use routes::register::register_user;
 
 #[macro_use]
 extern crate rocket;
 
 #[launch]
-fn rocket() -> _ {
+pub async fn rocket() ->Rocket<Build> {
 	rocket::build()
 		.attach(CorsOptions::default().to_cors().unwrap())
-		.mount("/", routes![])
+		.mount("/", routes![register_user])
 }
 
 // There should be three paths: one POST path to set the notification configuration,
