@@ -1,4 +1,4 @@
-use rusqlite::{params, Connection, Result};
+use rusqlite::{params, Connection, Error, Result};
 use types::Notifier;
 
 #[derive(Debug)]
@@ -40,8 +40,10 @@ impl User {
             })
         })?;
 
-        let user = users_iter.next().unwrap().unwrap();
-        Ok(user)
+        match users_iter.next() {
+            Some(data) => Ok(data.unwrap()),
+            None => Err(Error::QueryReturnedNoRows)
+        }
     }
 
     pub fn create_user(conn: &Connection, user: &User) -> Result<()> {
@@ -51,28 +53,31 @@ impl User {
             ..
         } = user;
         let notifier = match user.notifier {
-            Notifier::Email => "email",
-            Notifier::Telegram => "telegram",
-            _  => ""
+            Notifier::Email => Some("email"),
+            Notifier::Telegram => Some("telegram"),
+            _  => None
         };
 
-        if notifier.len() > 0 {
-            conn.execute(
-                "INSERT INTO users
-                    (email, tg_handle, notifier)
-                    VALUES (?1, ?2, ?3)
-                ",
-                params![email, tg_handle, notifier]
-            )?;
-        } else {
-            conn.execute(
-            "INSERT INTO users
-                    (email, tg_handle)
-                    VALUES (?1, ?2)
-                ",
-                params![email, tg_handle]
-            )?;
-        }
+        match notifier {
+            Some(note) => {
+                conn.execute(
+                    "INSERT INTO users
+                        (email, tg_handle, notifier)
+                        VALUES (?1, ?2, ?3)
+                    ",
+                    params![email, tg_handle, note]
+                )?;
+            },
+            None => {
+                conn.execute(
+                    "INSERT INTO users
+                        (email, tg_handle, notifier)
+                        VALUES (?1, ?2, NULL)
+                    ",
+                    params![email, tg_handle]
+                )?;
+            }
+        };
         Ok(())
     }
 

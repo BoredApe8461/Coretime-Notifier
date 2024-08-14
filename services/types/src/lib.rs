@@ -2,6 +2,8 @@ use std::path::PathBuf;
 
 use serde::{Deserialize, Serialize};
 
+pub mod api;
+
 /// Different events to which a user can subscribe to.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Hash)]
 #[serde(crate = "rocket::serde")]

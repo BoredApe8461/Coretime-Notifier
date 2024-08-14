@@ -1,6 +1,6 @@
-use rocket::{post, serde::json::Json};
+use rocket::{http::Status, post, response::status, serde::json::Json};
 use serde::{Deserialize, Serialize};
-use types::{Notifications, Notifier};
+use types::{api::ErrorResponse, Notifications, Notifier};
 
 use storage::users::User;
 
@@ -10,36 +10,56 @@ pub struct RegistrationData {
 	// TODO, for now we are using a u32 for identification, however, this will likely change once
 	// we do some form of user authentication.
 	pub id: u32,
-	/// Defines how the user wants to receive their notifications.
-	pub notifier: Notifier,
-	/// Notifications the user enabled.
-	// pub enabled_notifications: Vec<Notifications>,
+	// / Defines how the user wants to receive their notifications.
+	pub notifier: Option<Notifier>,
 	// The user's email, will be used if notifier != `Notifier::Telegram`
 	pub email: String,
 	// The user's telegram handle, used if tg_handle != `Notifier::Email`
-	pub handle: String,
+	pub tg_handle: String,
+	// Notifications the user enabled.
+	// pub enabled_notifications: Vec<Notifications>,
 }
 
 #[post("/register_user", data = "<registration_data>")]
-pub async fn register_user(registration_data: Json<RegistrationData>) -> Result<(), &'static str> {
-	// TODO: Check if the user is already registered. If they are, return an error.
+pub async fn register_user(registration_data: Json<RegistrationData>) -> Result<status::Custom<()>, status::Custom<Json<ErrorResponse>>> {
 	// Otherwise, register the new user.
 	let conn = &User::get_connection().expect("DB connection not established");
 	
 	// check if user exists
 	let user = User::query_by_id(conn, registration_data.id);
-	assert!(user.is_err(), "User already exists");
+	if user.is_ok() {
+		return Err(status::Custom(
+			Status::BadRequest,
+			Json(ErrorResponse {
+				message: "User already exists".to_string()
+			})
+		))
+	}
 
+	let notifier = match registration_data.notifier.clone() {
+		None => Notifier::Null,
+		Some(val) => val
+	};
 	// Register user
 	let user = User {
 		id: 0,
 		email: registration_data.email.clone(),
-		tg_handle: registration_data.handle.clone(),
-		notifier: registration_data.notifier.clone(),
+		tg_handle: registration_data.tg_handle.clone(),
+		notifier,
 	};
-	User::create_user(conn, &user).expect("FAILED: User should created");
-	
-	Ok(())
+	let result = User::create_user(conn, &user);
+
+	match result {
+		Ok(_) => Ok(status::Custom(Status::Ok, ())),
+		Err(_) => {
+			return Err(status::Custom(
+				Status::InternalServerError,
+				Json(ErrorResponse {
+					message: "Failed to register user".to_string(),
+				}),
+			));
+		}
+	}
 }
 
 
