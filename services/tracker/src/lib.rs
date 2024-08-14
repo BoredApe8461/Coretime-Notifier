@@ -4,6 +4,7 @@
 //! when needed.
 use crate::coretime_chain::runtime_types::pallet_broker::types::{ConfigRecord, SaleInfoRecord};
 use subxt::{blocks::Block, OnlineClient, PolkadotConfig};
+use types::ParaId;
 
 const LOG_TARGET: &str = "tracker";
 const RPC: &str = "wss://sys.ibp.network/coretime-kusama/";
@@ -54,6 +55,8 @@ pub async fn track() -> Result<(), Box<dyn std::error::Error>> {
 		track_interlude_phase(&block, interlude_start);
 		track_leadin_phase(&block, leadin_start);
 		track_fixed_phase(&block, fixed_phase_start);
+
+		
 	}
 
 	Ok(())
