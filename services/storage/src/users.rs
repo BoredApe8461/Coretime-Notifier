@@ -13,11 +13,17 @@ impl User {
     pub fn query_all(conn: &Connection) -> Result<Vec<User>> {
         let mut smth = conn.prepare("SELECT * FROM users WHERE id=?1")?;
         let users_iter = smth.query_map((), |row| {
+            let notifier = match row.get::<_, String>(3)?.as_str() {
+                "email" => Notifier::Email,
+                "telegram" => Notifier::Telegram,
+                _ => Notifier::Null,
+            };
+
             Ok(User {
                 id: row.get(0)?,
                 email: row.get(1)?,
                 tg_handle: row.get(2)?,
-                notifier: Notifier::Null,
+                notifier,
             })
         })?;
         
@@ -32,11 +38,16 @@ impl User {
     pub fn query_by_id(conn: &Connection, id: u32) -> Result<User> {
         let mut smth = conn.prepare("SELECT * FROM users WHERE id=?1")?;
         let mut users_iter = smth.query_map(&[&id], |row| {
+            let notifier = match row.get::<_, String>(3)?.as_str() {
+                "email" => Notifier::Email,
+                "telegram" => Notifier::Telegram,
+                _ => Notifier::Null,
+            };
             Ok(User {
                 id: row.get(0)?,
                 email: row.get(1)?,
                 tg_handle: row.get(2)?,
-                notifier: Notifier::Null,
+                notifier,
             })
         })?;
 
@@ -90,8 +101,8 @@ impl User {
        conn.execute(
             "CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-                tg_handle TEXT,
-                email TEXT,
+                tg_handle TEXT UNIQUE,
+                email TEXT UNIQUE,
                 notifier TEXT CHECK (
                     notifier IN ('email', 'telegram') 
                     OR notifier IS NULL
