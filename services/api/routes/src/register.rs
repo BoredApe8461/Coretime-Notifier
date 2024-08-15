@@ -28,7 +28,7 @@ impl Validate for RegistrationData {
 	fn validate(&self) -> Result<(), ValidationErrors> {
 		let mut errors = ValidationErrors::new();
 
-		// check that at least an email and Telegram exists
+		// Ensure that the user has set either an email or Telegram handle.
 		if self.email.len() == 0 && self.tg_handle.len() == 0 {
 			let error = ValidationError::new("Email and Telegram cannot be empty");
 			errors.add("email", error.clone());
