@@ -76,9 +76,21 @@ pub async fn register_user(registration_data: Json<RegistrationData>) -> Result<
 			})
 		)),
 		Ok(_) => {
-			// TODO: Query by email | tg_handle (depending on what the notifier value is)
 			// check if user exists
-			let user = User::query_by_id(conn, registration_data.id);
+			let notifier = match registration_data.notifier.clone() {
+				None => Notifier::Null,
+				Some(val) => val
+			};
+			
+			// Query by email | tg_handle (depending on what the notifier value is)
+			let user = match notifier {
+				// Check user by email
+				Notifier::Email => User::query_by_email(conn, registration_data.email.clone()),
+				// check by telegram handle
+				Notifier::Telegram => User::query_by_tg_handle(conn, registration_data.tg_handle.clone()),
+				_ => User::query_by_email(conn, registration_data.email.clone())
+			};
+			// let user = User::query_by_id(conn, registration_data.id);
 			if user.is_ok() {
 				return Err(status::Custom(
 					Status::BadRequest,
@@ -88,10 +100,6 @@ pub async fn register_user(registration_data: Json<RegistrationData>) -> Result<
 				))
 			}
 
-			let notifier = match registration_data.notifier.clone() {
-				None => Notifier::Null,
-				Some(val) => val
-			};
 			// Register user
 			let user = User {
 				id: 0,

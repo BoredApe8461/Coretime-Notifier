@@ -21,8 +21,8 @@ impl User {
 
             Ok(User {
                 id: row.get(0)?,
-                email: row.get(1)?,
-                tg_handle: row.get(2)?,
+                tg_handle: row.get(1)?,
+                email: row.get(2)?,
                 notifier,
             })
         })?;
@@ -45,8 +45,52 @@ impl User {
             };
             Ok(User {
                 id: row.get(0)?,
-                email: row.get(1)?,
-                tg_handle: row.get(2)?,
+                tg_handle: row.get(1)?,
+                email: row.get(2)?,
+                notifier,
+            })
+        })?;
+
+        match users_iter.next() {
+            Some(data) => Ok(data.unwrap()),
+            None => Err(Error::QueryReturnedNoRows)
+        }
+    }
+
+    pub fn query_by_email(conn: &Connection, email: String) -> Result<User> {
+        let mut smth = conn.prepare("SELECT * FROM users WHERE email=?1")?;
+        let mut users_iter = smth.query_map(&[&email], |row| {
+            let notifier = match row.get::<_, String>(3)?.as_str() {
+                "email" => Notifier::Email,
+                "telegram" => Notifier::Telegram,
+                _ => Notifier::Null,
+            };
+            Ok(User {
+                id: row.get(0)?,
+                tg_handle: row.get(1)?,
+                email: row.get(2)?,
+                notifier,
+            })
+        })?;
+
+        match users_iter.next() {
+            Some(data) => Ok(data.unwrap()),
+            None => Err(Error::QueryReturnedNoRows)
+        }
+    }
+
+    pub fn query_by_tg_handle(conn: &Connection, handle: String) -> Result<User> {
+        let mut smth = conn.prepare("SELECT * FROM users WHERE tg_handle=?1")?;
+        let mut users_iter = smth.query_map(&[&handle], |row| {
+            let notifier = match row.get::<_, String>(3)?.as_str() {
+                "email" => Notifier::Email,
+                "telegram" => Notifier::Telegram,
+                _ => Notifier::Null,
+            };
+            Ok(User {
+                id: row.get(0)?,
+                tg_handle: row.get(1)?,
+                email: row.get(2)?,
                 notifier,
             })
         })?;
