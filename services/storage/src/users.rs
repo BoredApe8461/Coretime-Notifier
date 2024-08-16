@@ -1,4 +1,4 @@
-use rusqlite::{params, Connection, Error, Result};
+use rusqlite::{params, Connection, Error, Result, };
 use types::Notifier;
 
 #[derive(Debug)]
@@ -11,22 +11,22 @@ pub struct User {
 
 impl User {
     pub fn query_all(conn: &Connection) -> Result<Vec<User>> {
-        let mut smth = conn.prepare("SELECT * FROM users WHERE id=?1")?;
-        let users_iter = smth.query_map((), |row| {
-            let notifier = match row.get::<_, String>(3)?.as_str() {
+        let mut stmt = conn.prepare("SELECT * FROM users WHERE id=?1")?;
+        let users_iter = stmt.query_map((), |row| {
+            let notifier = match row.get::<_, String>("notifier")?.as_str() {
                 "email" => Notifier::Email,
                 "telegram" => Notifier::Telegram,
                 _ => Notifier::Null,
             };
 
             Ok(User {
-                id: row.get(0)?,
-                tg_handle: row.get(1)?,
-                email: row.get(2)?,
+                id: row.get("id")?,
+                tg_handle: row.get("tg_handle")?,
+                email: row.get("email")?,
                 notifier,
             })
         })?;
-        
+
         let mut users = Vec::new();
         for user in users_iter {
             users.push(user.unwrap());
@@ -44,9 +44,9 @@ impl User {
                 _ => Notifier::Null,
             };
             Ok(User {
-                id: row.get(0)?,
-                tg_handle: row.get(1)?,
-                email: row.get(2)?,
+                id: row.get("id")?,
+                tg_handle: row.get("tg_handle")?,
+                email: row.get("email")?,
                 notifier,
             })
         })?;
@@ -66,9 +66,9 @@ impl User {
                 _ => Notifier::Null,
             };
             Ok(User {
-                id: row.get(0)?,
-                tg_handle: row.get(1)?,
-                email: row.get(2)?,
+                id: row.get("id")?,
+                tg_handle: row.get("tg_handle")?,
+                email: row.get("email")?,
                 notifier,
             })
         })?;
@@ -88,9 +88,9 @@ impl User {
                 _ => Notifier::Null,
             };
             Ok(User {
-                id: row.get(0)?,
-                tg_handle: row.get(1)?,
-                email: row.get(2)?,
+                id: row.get("id")?,
+                tg_handle: row.get("tg_handle")?,
+                email: row.get("email")?,
                 notifier,
             })
         })?;
