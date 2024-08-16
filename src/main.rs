@@ -2,6 +2,7 @@
 
 #[tokio::main]
 async fn main() {
-	storage::initialize_db().unwrap();
+	// Initialize the API service
+	api::rocket().await.launch().await.unwrap();
 	tracker::track().await.unwrap();
 }

@@ -1,4 +1,8 @@
+use std::path::PathBuf;
+
 use serde::{Deserialize, Serialize};
+
+pub mod api;
 
 /// Different events to which a user can subscribe to.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Hash)]
@@ -41,6 +45,10 @@ pub enum TimeOptions {
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Hash)]
 #[serde(crate = "rocket::serde")]
 pub enum Notifier {
+	// User will receive notifications via their email.
 	Email,
+	// User will receive notifications via their telegram.
 	Telegram,
+	/// If `Null` user will not receive notifications.
+	Null,
 }
