@@ -1,6 +1,6 @@
 use rocket::{http::Status, post, response::status, serde::json::Json};
 use serde::{Deserialize, Serialize};
-use types::{api::ErrorResponse, Notifier};
+use types::{api::ErrorResponse, Notifications, Notifier};
 use validator::{Validate, ValidationError, ValidationErrors};
 
 use storage::users::User;
@@ -11,17 +11,15 @@ pub struct RegistrationData {
 	// TODO, for now we are using a u32 for identification, however, this will likely change once
 	// we do some form of user authentication.
 	pub id: u32,
-	// / Defines how the user wants to receive their notifications.
+	/// Defines how the user wants to receive their notifications.
 	pub notifier: Notifier,
 	// The user's email, will be used if notifier != `Notifier::Telegram`
-	// #[validate(email)]
 	pub email: Option<String>,
 	// The user's telegram handle, used if tg_handle != `Notifier::Email`
-	// #[validate]
 	#[serde(rename = "tgHandle")]
 	pub tg_handle: Option<String>,
 	// Notifications the user enabled.
-	// pub enabled_notifications: Vec<Notifications>,
+	pub enabled_notifications: Vec<Notifications>,
 }
 
 impl Validate for RegistrationData {
@@ -61,7 +59,6 @@ impl Validate for RegistrationData {
 pub async fn register_user(
 	registration_data: Json<RegistrationData>,
 ) -> Result<status::Custom<()>, status::Custom<Json<ErrorResponse>>> {
-	// Otherwise, register the new user.
 	let conn = &User::get_connection().expect("DB connection not established");
 
 	registration_data.validate().map_err(|error| {
@@ -83,14 +80,13 @@ pub async fn register_user(
 		}
 	}
 
-	// Register user
 	let user = User {
 		id: registration_data.id,
 		email: registration_data.email.clone(),
 		tg_handle: registration_data.tg_handle.clone(),
 		notifier: registration_data.notifier.clone(),
 	};
-
+	// Register user
 	User::create_user(conn, &user).map_err(|_| {
 		status::Custom(
 			Status::InternalServerError,
