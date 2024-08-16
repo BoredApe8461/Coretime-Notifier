@@ -38,7 +38,7 @@ impl User {
     pub fn query_by_id(conn: &Connection, id: u32) -> Result<User> {
         let mut smth = conn.prepare("SELECT * FROM users WHERE id=?1")?;
         let mut users_iter = smth.query_map(&[&id], |row| {
-            let notifier = match row.get::<_, String>(3)?.as_str() {
+            let notifier = match row.get::<_, String>("notifier")?.as_str() {
                 "email" => Notifier::Email,
                 "telegram" => Notifier::Telegram,
                 _ => Notifier::Null,
@@ -60,7 +60,7 @@ impl User {
     pub fn query_by_email(conn: &Connection, email: String) -> Result<User> {
         let mut smth = conn.prepare("SELECT * FROM users WHERE email=?1")?;
         let mut users_iter = smth.query_map(&[&email], |row| {
-            let notifier = match row.get::<_, String>(3)?.as_str() {
+            let notifier = match row.get::<_, String>("notifier")?.as_str() {
                 "email" => Notifier::Email,
                 "telegram" => Notifier::Telegram,
                 _ => Notifier::Null,
@@ -82,7 +82,7 @@ impl User {
     pub fn query_by_tg_handle(conn: &Connection, handle: String) -> Result<User> {
         let mut smth = conn.prepare("SELECT * FROM users WHERE tg_handle=?1")?;
         let mut users_iter = smth.query_map(&[&handle], |row| {
-            let notifier = match row.get::<_, String>(3)?.as_str() {
+            let notifier = match row.get::<_, String>("notifier")?.as_str() {
                 "email" => Notifier::Email,
                 "telegram" => Notifier::Telegram,
                 _ => Notifier::Null,
