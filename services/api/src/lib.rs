@@ -13,7 +13,7 @@ use routes::register::register_user;
 extern crate rocket;
 
 #[launch]
-pub async fn rocket() ->Rocket<Build> {
+pub async fn rocket() -> Rocket<Build> {
 	rocket::build()
 		.attach(CorsOptions::default().to_cors().unwrap())
 		.mount("/", routes![register_user])

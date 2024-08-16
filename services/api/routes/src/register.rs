@@ -38,52 +38,49 @@ impl Validate for RegistrationData {
 
 		// Ensure the configured notifier is set.
 		match self.notifier {
-			Notifier::Email => {
+			Notifier::Email =>
 				if self.email.is_none() {
 					errors.add("email", ValidationError::new("Email must not be empty"));
-					return Err(errors) 
+					return Err(errors)
 				} else {
 					Ok(())
-				}
-			},
-			Notifier::Telegram => {
+				},
+			Notifier::Telegram =>
 				if self.tg_handle.is_none() {
-					errors.add("tg_handle", ValidationError::new("Telegram handle must exist")); 
-					return Err(errors) 
+					errors.add("tg_handle", ValidationError::new("Telegram handle must exist"));
+					return Err(errors)
 				} else {
 					return Ok(())
-				}
-			},
-			_ => Ok(())
+				},
+			_ => Ok(()),
 		}
 	}
 }
 
 #[post("/register_user", data = "<registration_data>")]
-pub async fn register_user(registration_data: Json<RegistrationData>) -> Result<status::Custom<()>, status::Custom<Json<ErrorResponse>>> {
+pub async fn register_user(
+	registration_data: Json<RegistrationData>,
+) -> Result<status::Custom<()>, status::Custom<Json<ErrorResponse>>> {
 	// Otherwise, register the new user.
 	let conn = &User::get_connection().expect("DB connection not established");
 
 	registration_data.validate().map_err(|error| {
-		status::Custom(
-			Status::BadRequest,
-			Json(ErrorResponse {
-				message: error.to_string()
-			})
-		)
+		status::Custom(Status::BadRequest, Json(ErrorResponse { message: error.to_string() }))
 	})?;
 
 	let error = Err(status::Custom(
-			Status::BadRequest,
-			Json(ErrorResponse {
-				message: "User already exists".to_string()
-			})
+		Status::BadRequest,
+		Json(ErrorResponse { message: "User already exists".to_string() }),
 	));
 	if let Some(email) = registration_data.email.clone() {
-		if User::query_by_email(conn, email).is_ok() { return error }
+		if User::query_by_email(conn, email).is_ok() {
+			return error
+		}
 	}
 	if let Some(tg_handle) = registration_data.tg_handle.clone() {
-		if User::query_by_tg_handle(conn, tg_handle).is_ok() { return error }
+		if User::query_by_tg_handle(conn, tg_handle).is_ok() {
+			return error
+		}
 	}
 
 	// Register user
@@ -93,17 +90,13 @@ pub async fn register_user(registration_data: Json<RegistrationData>) -> Result<
 		tg_handle: registration_data.tg_handle.clone(),
 		notifier: registration_data.notifier.clone(),
 	};
-	let result = User::create_user(conn, &user);
 
-	match result {
-		Ok(_) => Ok(status::Custom(Status::Ok, ())),
-		Err(_) => {
-			return Err(status::Custom(
-				Status::InternalServerError,
-				Json(ErrorResponse {
-					message: "Failed to register user".to_string(),
-				}),
-			));
-		}
-	}
+	User::create_user(conn, &user).map_err(|_| {
+		status::Custom(
+			Status::InternalServerError,
+			Json(ErrorResponse { message: "Failed to register user".to_string() }),
+		)
+	})?;
+
+	Ok(status::Custom(Status::Ok, ()))
 }
