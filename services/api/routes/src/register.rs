@@ -70,7 +70,7 @@ pub async fn register_user(
 
 	let error = Err(status::Custom(
 		Status::BadRequest,
-		Json(ErrorResponse { message: "User already exists".to_string() }),
+		Json(ErrorResponse { message: "User already exists with the same notifier".to_string() }),
 	));
 	if let Some(email) = registration_data.email.clone() {
 		if User::query_by_email(conn, email).is_ok() {

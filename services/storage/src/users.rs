@@ -115,13 +115,13 @@ impl User {
 		};
 
 		match notifier {
-			Some(note) => {
+			Some(notifier) => {
 				conn.execute(
 					"INSERT INTO users
                         (email, tg_handle, notifier)
                         VALUES (?1, ?2, ?3)
                     ",
-					params![email, tg_handle, note],
+					params![email, tg_handle, notifier],
 				)?;
 			},
 			None => {
@@ -140,7 +140,6 @@ impl User {
 	pub fn get_connection() -> Result<Connection> {
 		let db_path = "db/users.db";
 
-		// Verify the db exists
 		// Create the `users.db` if it does not exist.
 		let conn = Connection::open(db_path)?;
 		conn.execute(
