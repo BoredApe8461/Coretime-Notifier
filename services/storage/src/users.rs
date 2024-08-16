@@ -1,11 +1,16 @@
 use rusqlite::{params, Connection, Error, Result, };
 use types::Notifier;
 
+/// The data stored for each user in the database.
 #[derive(Debug)]
 pub struct User {
+    /// A unique identifier for a user.
 	pub id: u32,
-	pub email: String,
-	pub tg_handle: String,
+    /// Email of the user.
+	pub email: Option<String>,
+    /// Telegram handle of the user.
+	pub tg_handle: Option<String>,
+    /// Defines the channel through which the user would like to be notified.
     pub notifier: Notifier,
 }
 
