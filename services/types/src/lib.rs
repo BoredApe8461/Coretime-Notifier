@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-type ParaId = u32;
+pub type ParaId = u32;
 
 /// Different events to which a user can subscribe to.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Hash)]

@@ -55,8 +55,6 @@ pub async fn track() -> Result<(), Box<dyn std::error::Error>> {
 		track_interlude_phase(&block, interlude_start);
 		track_leadin_phase(&block, leadin_start);
 		track_fixed_phase(&block, fixed_phase_start);
-
-		
 	}
 
 	Ok(())
