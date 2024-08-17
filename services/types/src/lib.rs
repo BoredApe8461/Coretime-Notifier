@@ -4,6 +4,8 @@ use serde::{Deserialize, Serialize};
 
 pub mod api;
 
+pub type ParaId = u32;
+
 /// Different events to which a user can subscribe to.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Hash)]
 #[serde(crate = "rocket::serde")]
@@ -16,6 +18,10 @@ pub enum Notifications {
 	FixedPhaseStart(PhaseNotification),
 	/// Whenever coretime is sold.
 	CoretimeSale,
+	/// Coretime-related notifications for a parachain.
+	///
+	/// This will notify if the parachain is about to expire and when Coretime is assigned to it.
+	ParachainState(ParaId),
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Hash)]

@@ -4,6 +4,7 @@
 //! when needed.
 use crate::coretime_chain::runtime_types::pallet_broker::types::{ConfigRecord, SaleInfoRecord};
 use subxt::{blocks::Block, OnlineClient, PolkadotConfig};
+use types::ParaId;
 
 const LOG_TARGET: &str = "tracker";
 const RPC: &str = "wss://sys.ibp.network/coretime-kusama/";
@@ -52,7 +53,38 @@ pub async fn track() -> Result<(), Box<dyn std::error::Error>> {
 		track_interlude_phase(&block, interlude_start);
 		track_leadin_phase(&block, leadin_start);
 		track_fixed_phase(&block, fixed_phase_start);
+		track_assignments_and_renewals(&block);
 	}
+
+	Ok(())
+}
+
+async fn track_assignments_and_renewals(
+	block: &Block<PolkadotConfig, OnlineClient<PolkadotConfig>>,
+) -> Result<(), Box<dyn std::error::Error>> {
+	let events = block.events().await.map_err(|_| "Failed to get events")?;
+
+	// Iterate over assignments:
+	events.find::<broker_events::Assigned>().for_each(|maybe_assignment| {
+		if let Ok(assignment) = maybe_assignment {
+			let task_id = assignment.task;
+
+			// TODO: notify everyone subscribed to the parachain.
+		}
+	});
+
+	// Iterate over renewals:
+	events.find::<broker_events::Renewed>().for_each(|maybe_renewal| {
+		if let Ok(renewal) = maybe_renewal {
+			let workload = renewal.workload;
+
+			// Given that only non interlaced cores are renewed there should always be a sinle item
+			// in the workload. However, we will still iterate over each.
+			workload.0.iter().for_each(|schedule_item| {
+				// TODO: notify everyone subscribed to the parachain.
+			});
+		}
+	});
 
 	Ok(())
 }
