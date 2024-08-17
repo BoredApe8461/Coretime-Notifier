@@ -48,8 +48,6 @@ pub async fn track() -> Result<(), Box<dyn std::error::Error>> {
 
 	// Wait for new finalized blocks, then check if an event we are waiting for happened.
 	while let Some(Ok(block)) = blocks_sub.next().await {
-		println!("{}", block.header().number);
-
 		// Track everything we want to track:
 		track_coretime_sales(&client, &block).await;
 		track_interlude_phase(&block, interlude_start);
